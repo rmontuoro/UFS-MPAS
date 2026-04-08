@@ -1,0 +1,4 @@
+[submodule "src/model/MPAS-Model"]
+	path = src/model/MPAS-Model
+	url = https://github.com/rmontuoro/MPAS-Model
+	branch = feature/ufs
