@@ -8,7 +8,8 @@ if (NOT ESMF_FOUND)
   find_package(ESMF REQUIRED)
 endif ()
 
-list(APPEND ufs_mpas_files src/ufs_mpas_cap.F90)
+# UFS interface
+list(APPEND ufs_mpas_files src/drv/ufs_mpas_cap.F90)
 
 add_library(ufs-mpas STATIC ${ufs_mpas_files})
 set_target_properties(ufs-mpas PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mod)
