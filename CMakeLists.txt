@@ -2,21 +2,31 @@ cmake_minimum_required(VERSION 3.19)
 
 project(ufs-mpas
         VERSION 1.0
-        LANGUAGES C CXX Fortran)
+        LANGUAGES C Fortran)
 
 if (NOT ESMF_FOUND)
-  find_package(ESMF REQUIRED)
+    list(APPEND CMAKE_MODULE_PATH $ENV{ESMF_ROOT}/cmake)
+    list(APPEND CMAKE_MODULE_PATH $ENV{esmf_ROOT}/cmake)
+    find_package(ESMF REQUIRED)
 endif ()
 
-# UFS interface
-list(APPEND ufs_mpas_files src/drv/ufs_mpas_cap.F90)
+# MPAS model
+add_subdirectory(src/model/MPAS-Model)
 
-add_library(ufs-mpas STATIC ${ufs_mpas_files})
+# UFS interface
+set(ufs_mpas_files
+    ufs_mpas_cap.F90
+    ufs_mpas_methods.F90
+    ufs_mpas_types.F90
+)
+list(TRANSFORM ufs_mpas_files PREPEND src/drv/)
+
+add_library(ufs-mpas ${ufs_mpas_files})
 set_target_properties(ufs-mpas PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mod)
-target_include_directories(ufs-mpas INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/mod>
-                                              $<INSTALL_INTERFACE:mod>)
+target_include_directories(ufs-mpas PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/mod>
+                                           $<INSTALL_INTERFACE:mod>)
 target_include_directories(ufs-mpas PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_link_libraries(ufs-mpas PRIVATE ESMF::ESMF)
+target_link_libraries(ufs-mpas PUBLIC MPAS::core::atmosphere ESMF::ESMF)
 list(APPEND LIB_TARGETS ufs-mpas)
 
 add_library(ufs-mpas::ufs-mpas ALIAS ufs-mpas)
@@ -42,4 +52,3 @@ install(EXPORT      UFS-MPASExports
         NAMESPACE   ufs-mpas::
         FILE        ufs-mpas-targets.cmake
         DESTINATION lib/cmake)
-

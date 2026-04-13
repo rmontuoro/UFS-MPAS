@@ -7,9 +7,16 @@ module ufs_mpas_cap
   use NUOPC_Model, &
     ModelSS => SetServices
 
+  use ufs_mpas_methods
+
   implicit none
 
-! private
+  private
+
+  public :: SetServices,    &
+            DataInitialize, &
+            Advance,        &
+            Finalize
 
 contains
 
@@ -22,7 +29,7 @@ contains
     _rc_var_define_
 
     ! -- begin
-    rc = ESMF_SUCCESS
+    _rc_set_ok_
 
     ! -- derive component from generic NUOPC_Model
     call NUOPC_CompDerive(model, modelSS, _rc_)
@@ -52,12 +59,14 @@ contains
     type(ESMF_VM)              :: vm
 
     ! -- begin
-    rc = ESMF_SUCCESS
+    _rc_set_ok_
 
     call ESMF_GridCompGet(model, vm=vm, _rc_)
     call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, _rc_)
     write(logm, '("UFS-ATM: DataInitialize: PET: ",i0," of ",i0)') localPet, petCount
     call ESMF_LogWrite(logm, _rc_)
+
+    call ufs_mpas_model_initialize(model, _rc_)
 
     call NUOPC_CompAttributeSet(model, name="InitializeDataComplete", value="true", _rc_)
     
@@ -71,13 +80,13 @@ contains
 
     ! -- local variables
     _rc_var_define_
-    integer :: i, n
+    integer                    :: i, n
     character(len=ESMF_MAXSTR) :: clockStr, clockOptions(3), name
     type(ESMF_Clock)           :: driverClock, modelClock, clock
     type(ESMF_TimeInterval)    :: timeStep
 
     ! -- begin
-    rc = ESMF_SUCCESS
+    _rc_set_ok_
 
     call ESMF_LogWrite("UFS-ATM: Advance", _rc_)
 
@@ -100,6 +109,8 @@ contains
       clock = modelClock
       name  = "model"
     end do
+
+    call ufs_mpas_model_run(model, _rc_)
     
   end subroutine Advance
 
@@ -113,9 +124,11 @@ contains
     _rc_var_define_
 
     ! -- begin
-    rc = ESMF_SUCCESS
+    _rc_set_ok_
 
     call ESMF_LogWrite("UFS-ATM: Finalize", _rc_)
+
+    call ufs_mpas_model_finalize(model, _rc_)
 
   end subroutine Finalize
   
