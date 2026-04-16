@@ -12,10 +12,11 @@
 
 #define _ufs_assert_set_(c,a,b,m)		\
 	if (.not.(c)) then; \
-		call _ufd_log_set_(_ufs_log_args(a,b,m)); \
+		call _ufs_log_set_(_ufs_log_args_(a,b,m)); \
 		return; \
 	end if
-#define _ufs_assert_(c)				_ufs_assert_set_(c,_ufs_log_err_,rc,_ufs_log_msg_)
+#define _ufs_assert_log_(c,e,m)			_ufs_assert_set_(c,e,rc,m)
+#define _ufs_assert_(c)				_ufs_assert_log_(c,_ufs_log_err_,_ufs_log_msg_)
 
 #define _rc_var_define_				integer :: localrc
 #define _rc_arg_define_				integer, optional, intent(out) :: rc
