@@ -28,25 +28,26 @@ contains
     ! -- local variables
     _rc_var_define_
     _stat_var_define_
-    integer        :: comm
-    type (ESMF_VM) :: vm
-    type (ufs_mpas_internal_state_type) :: is
+    integer                                :: comm
+    type (ESMF_VM)                         :: vm
+    type (ufs_internal_data_type), pointer :: data => null()
+
+    type(ESMF_Mesh) :: mesh ! TEST
 
     ! -- begin
     _rc_init_
 
-    ! -- allocate component's private data structure storing MPAS info
-    allocate(is % mpas, _alloc_stat_)
+    ! -- retrieve component's private data container
+    data => ufs_mpas_internal_data_get(model, _rc_)
 
-    ! -- retrieve MPI communicator from component's VM 
-    call ESMF_GridCompGet(model, vm=vm, _rc_)
-    call ESMF_VMGet(vm, mpiCommunicator=comm)
+    if (associated(data)) then
+      ! -- retrieve MPI communicator from component's VM
+      call ESMF_GridCompGet(model, vm=vm, _rc_)
+      call ESMF_VMGet(vm, mpiCommunicator=comm)
 
-    ! -- initialize MPAS
-    call mpas_init(is % mpas % corelist, is % mpas % domain, external_comm=comm)
-
-    ! -- add internal state to component
-    call ESMF_GridCompSetInternalState(model, is, _rc_)
+      ! -- initialize MPAS
+      call mpas_init(data % mpas % corelist, data % mpas % domain, external_comm=comm)
+    end if
 
   end subroutine ufs_mpas_model_initialize
 
@@ -58,22 +59,22 @@ contains
 
     ! -- local variables
     _rc_var_define_
-    integer           :: comm
-    type(core_type)   :: corelist
-    type(domain_type) :: domain
-    type(ESMF_VM)     :: vm
-    type(ufs_mpas_internal_state_type) :: is
+    integer                               :: comm
+    type(core_type)                       :: corelist
+    type(domain_type)                     :: domain
+    type(ufs_internal_data_type), pointer :: data => null()
 
     ! -- begin
     _rc_init_
 
-    ! -- retrieve component's internal state
-    call ESMF_GridCompGetInternalState(model, is, _rc_)
+    ! -- retrieve component's private data container
+    data => ufs_mpas_internal_data_get(model, _rc_)
 
     ! -- run MPAS
-    if (associated(is % mpas)) call mpas_run(is % mpas % domain)
+    if (associated(data)) call mpas_run(data % mpas % domain)
 
   end subroutine ufs_mpas_model_run
+
 
   subroutine ufs_mpas_model_finalize(model, rc)
 
@@ -82,16 +83,14 @@ contains
 
     ! -- local variables
     _rc_var_define_
-    _stat_var_define_
-    type(ufs_mpas_internal_state_type) :: is
+    type(ufs_internal_data_type), pointer :: data => null()
 
-    ! -- retrieve component's internal state
-    call ESMF_GridCompGetInternalState(model, is, _rc_)
+    ! -- retrieve component's private data container
+    data => ufs_mpas_internal_data_get(model, _rc_)
 
     ! -- finalize MPAS
-    if (associated(is % mpas)) then
-      call mpas_finalize(is % mpas % corelist, is % mpas % domain)
-      deallocate(is % mpas, _deall_stat_)
+    if (associated(data)) then
+      call mpas_finalize(data % mpas % corelist, data % mpas % domain)
     end if
 
   end subroutine ufs_mpas_model_finalize

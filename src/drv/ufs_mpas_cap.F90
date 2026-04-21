@@ -7,7 +7,9 @@ module ufs_mpas_cap
   use NUOPC_Model, &
     ModelSS => SetServices
 
+  use ufs_mpas_geom
   use ufs_mpas_methods
+  use ufs_mpas_types
 
   implicit none
 
@@ -66,8 +68,16 @@ contains
     write(logm, '("UFS-ATM: DataInitialize: PET: ",i0," of ",i0)') localPet, petCount
     call ESMF_LogWrite(logm, _rc_)
 
+    ! -- initialize component's internal state
+    call ufs_mpas_internal_state_initialize(model, _rc_)
+
+    ! -- initialize MPAS model
     call ufs_mpas_model_initialize(model, _rc_)
 
+    ! -- create component's geometry objects
+    call ufs_mpas_geom_initialize(model, _rc_)
+
+    ! -- NUOPC DataInitialize phase is now complete
     call NUOPC_CompAttributeSet(model, name="InitializeDataComplete", value="true", _rc_)
     
   end subroutine DataInitialize
@@ -110,6 +120,7 @@ contains
       name  = "model"
     end do
 
+    ! -- call MPAS run method
     call ufs_mpas_model_run(model, _rc_)
     
   end subroutine Advance
@@ -128,7 +139,14 @@ contains
 
     call ESMF_LogWrite("UFS-ATM: Finalize", _rc_)
 
+    ! -- finalize MPAS model
     call ufs_mpas_model_finalize(model, _rc_)
+
+    ! -- free up memory from geometry objects
+    call ufs_mpas_geom_finalize(model, _rc_)
+
+    ! -- free up memory from internal state
+    call ufs_mpas_internal_state_finalize(model, _rc_)
 
   end subroutine Finalize
   

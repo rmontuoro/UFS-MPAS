@@ -16,6 +16,7 @@ add_subdirectory(src/model/MPAS-Model)
 # UFS interface
 set(ufs_mpas_files
     ufs_mpas_cap.F90
+    ufs_mpas_geom.F90
     ufs_mpas_methods.F90
     ufs_mpas_types.F90
 )
