@@ -7,8 +7,8 @@
 #define _ufs_log_alloc_check_			ESMF_LogFoundAllocError
 #define _ufs_log_deall_check_			ESMF_LogFoundDeallocError
 #define _ufs_log_set_				ESMF_LogSetError
-#define _ufs_log_args_(a,b,m)			rcToCheck=a, msg=#m, file=__FILE__, line=__LINE__, rcToReturn=b
-#define _ufs_log_stat_args_(a,b,m)		statusToCheck=a, msg=#m, file=__FILE__, line=__LINE__, rcToReturn=b
+#define _ufs_log_args_(a,b,m)			rcToCheck=a, msg=m, file=__FILE__, line=__LINE__, rcToReturn=b
+#define _ufs_log_stat_args_(a,b,m)		statusToCheck=a, msg=m, file=__FILE__, line=__LINE__, rcToReturn=b
 
 #define _ufs_assert_set_(c,a,b,m)		\
 	if (.not.(c)) then; \

@@ -119,7 +119,7 @@ contains
     _rc_init_
 
     ! -- grid_size sanity check
-    _ufs_assert_log_(size(grid_size) >= 2,ESMF_RC_ARG_SIZE,grid_size array size must be at least 2)
+    _ufs_assert_log_(size(grid_size) >= 2,ESMF_RC_ARG_SIZE,"grid_size array size must be at least 2")
 
     ! -- create output lat/lon grid
     grid = ESMF_GridCreate1PeriDim( &
