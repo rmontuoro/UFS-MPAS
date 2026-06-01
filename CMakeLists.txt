@@ -22,6 +22,8 @@ set(ufs_mpas_files
 )
 list(TRANSFORM ufs_mpas_files PREPEND src/drv/)
 
+target_compile_options(framework PRIVATE $<$<COMPILE_LANG_AND_ID:Fortran,Intel>:-falias>)
+
 add_library(ufs-mpas ${ufs_mpas_files})
 set_target_properties(ufs-mpas PROPERTIES Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mod)
 target_include_directories(ufs-mpas PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/mod>
